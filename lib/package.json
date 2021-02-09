@@ -1,0 +1,31 @@
+{
+  "name": "@innet/for",
+  "version": "0.1.0",
+  "description": "This plugin helps to render a list of elements.",
+  "main": "index.js",
+  "module": "index.es6.js",
+  "jsnext:main": "index.es6.js",
+  "types": "index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/d8corp/innet-for.git"
+  },
+  "keywords": [
+    "plugin",
+    "innet",
+    "for",
+    "list",
+    "array",
+    "front-end"
+  ],
+  "author": "Mikhail Lysikov <d8corp@mail.ru>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/d8corp/innet-for/issues"
+  },
+  "homepage": "https://github.com/d8corp/innet-for",
+  "dependencies": {
+    "innet": "^0.1.0",
+    "tslib": "^2.1.0"
+  }
+}
