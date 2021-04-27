@@ -1,5 +1,6 @@
 # @innet/for
 [![NPM](https://img.shields.io/npm/v/@innet/for.svg)](https://github.com/d8corp/innet-for/blob/main/CHANGELOG.md)
+[![minzipped size](https://img.shields.io/bundlephobia/minzip/@innet/for)](https://bundlephobia.com/result?p=@innet/for)
 [![downloads](https://img.shields.io/npm/dm/@innet/for.svg)](https://www.npmjs.com/package/@innet/for)
 [![license](https://img.shields.io/npm/l/@innet/for)](https://github.com/d8corp/innet-for/blob/main/LICENSE)  
 This plugin helps to render a list of elements.
