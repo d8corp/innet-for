@@ -39,7 +39,7 @@ innet({type: App}, undefined, {for: For})
 Then just use it anywhere in the app.
 ```typescript jsx
 <for of={['foo', 'bar', 'baz']}>
-  {(value, index) => <div>#{index}: {value}</div>}
+  {value => <div>{value}</div>}
 </for>
 ```
 
