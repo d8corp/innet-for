@@ -1,7 +1,6 @@
 import typescript from 'rollup-plugin-typescript2'
 import pkg from './package.json'
 import {terser} from 'rollup-plugin-terser'
-import {nodeResolve} from '@rollup/plugin-node-resolve'
 
 export default [{
   input: 'src/index.ts',
@@ -13,18 +12,15 @@ export default [{
   },
   plugins: [
     typescript(),
-    nodeResolve(),
   ]
 }, {
   input: 'src/index.ts',
-  external: ['tslib'],
   output: {
     dir: 'lib',
     entryFileNames: '[name]' + pkg.module.replace('index', ''),
     format: 'es'
   },
   plugins: [
-    nodeResolve(),
     typescript({
       tsconfigOverride: {
         compilerOptions: {
