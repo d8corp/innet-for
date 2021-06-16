@@ -1,5 +1,5 @@
 import innet, {append, dom, remove, prepend, after, clear, Content} from 'innet'
-import {Watch, State, Cache, unwatch, onClear} from 'watch-state'
+import {Watch, State, Cache} from 'watch-state'
 
 interface ForMap {
   watcher: Watch
@@ -16,9 +16,8 @@ interface WatchTarget <R = any> {
 type OfPropStatic<T = any> = T[] | Set<T>
 type OfProp<T = any> = OfPropStatic<T> | WatchTarget<OfPropStatic<T>>
 
-interface ForProps<T = any> {
+export interface ForProps<T = any> {
   of: OfProp<T>
-  else?: Content
   size?: number | WatchTarget<number>
   key?: keyof T | ((item: T) => any)
 }
@@ -33,20 +32,25 @@ function getKey (key, value) {
   }
 }
 
-function For (target, parent, plugins, plugin) {
-  const {props, children} = target
-  const {size: sizeProp = Infinity, key} = props
-  const callback: Function = children[0] as Function
-  const ofProp = props.of
-
+function For ({
+  children: [
+    callback,
+    ...elseProp
+  ],
+  props: {
+    size: sizeProp = Infinity,
+    key,
+    of: ofProp,
+  }
+}, parent, plugins, plugin) {
   if (typeof ofProp === 'function' || typeof sizeProp === 'function') {
     const size = typeof sizeProp === 'function' ? new Cache(sizeProp) : {value: sizeProp}
     const mainComment = document.createComment('for')
     let elseWatcher: Watch
     append(parent, mainComment)
-    onClear(() => {
-      map.forEach(({watcher}) => watcher.destructor())
-      elseWatcher?.destructor()
+    Watch.activeWatcher?.onDestroy(() => {
+      map.forEach(({watcher}) => watcher.destroy())
+      elseWatcher?.destroy()
       remove(mainComment)
     })
 
@@ -67,7 +71,7 @@ function For (target, parent, plugins, plugin) {
             break
           }
           if (elseWatcher) {
-            elseWatcher.destructor()
+            elseWatcher.destroy()
             elseWatcher = undefined
             clear(mainComment)
           }
@@ -103,12 +107,12 @@ function For (target, parent, plugins, plugin) {
               prepend(mainComment, comment)
             }
 
-            const watcher = unwatch(() => new Watch(update => {
+            const watcher = new Watch(update => {
               if (update) {
                 clear(comment)
               }
               innet(callback(value, () => index.value), comment, plugins, plugin)
-            }))
+            }, true)
 
             map.set(valueKey, {comment, value, index, watcher})
           }
@@ -117,13 +121,11 @@ function For (target, parent, plugins, plugin) {
           i++
         }
         oldMap.forEach(({comment, watcher}) => {
-          watcher.destructor()
+          watcher.destroy()
           remove(comment)
         })
-        if (!i && props.else) {
-          unwatch(() => {
-            elseWatcher = new Watch(() => innet(props.else, mainComment, plugins, plugin))
-          })
+        if (!i && elseProp.length) {
+          elseWatcher = new Watch(() => innet(elseProp, mainComment, plugins, plugin), true)
         }
       } else {
         let i = 0
@@ -146,19 +148,17 @@ function For (target, parent, plugins, plugin) {
           valuesList.push(valueKey)
 
           append(mainComment, comment)
-          const watcher = unwatch(() => new Watch(update => {
+          const watcher = new Watch(update => {
             if (update) {
               clear(comment)
             }
             innet(callback(value, () => index.value), comment, plugins, plugin)
-          }))
+          }, true)
 
           map.set(getKey(key, value), {comment, value, index, watcher})
         }
-        if (!i && props.else) {
-          unwatch(() => {
-            elseWatcher = new Watch(() => innet(props.else, mainComment, plugins, plugin))
-          })
+        if (!i && elseProp.length) {
+          elseWatcher = new Watch(() => innet(elseProp, mainComment, plugins, plugin), true)
         }
       }
     })
@@ -172,8 +172,8 @@ function For (target, parent, plugins, plugin) {
       result.push(callback(value, i++))
     }
     if (!i) {
-      if (props.else) {
-        innet(props.else, parent, plugins, dom)
+      if (elseProp.length) {
+        innet(elseProp, parent, plugins, dom)
       }
     } else {
       innet(result, parent, plugins, dom)
@@ -182,7 +182,3 @@ function For (target, parent, plugins, plugin) {
 }
 
 export default For
-
-export {
-  ForProps
-}

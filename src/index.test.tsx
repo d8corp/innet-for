@@ -1,5 +1,5 @@
-import {innet} from 'innet'
-import {State, onDestructor} from 'watch-state'
+import innet from 'innet'
+import {State, Watch} from 'watch-state'
 import renderElement from 'innet/utils/test/renderElement'
 import getHTML from 'innet/utils/test/getHTML'
 
@@ -31,8 +31,9 @@ describe('for', () => {
     })
     test('else', () => {
       const el = render(
-        <for of={[]} else='test'>
+        <for of={[]}>
           {(item, i) => <div>{i}: {item}</div>}
+          test
         </for>
       )
       expect(getHTML(el)).toBe('test')
@@ -40,8 +41,9 @@ describe('for', () => {
     test('dynamic else', () => {
       const state = new State([])
       const el = render(
-        <for of={() => state.value} else='test'>
+        <for of={() => state.value}>
           {(item, i) => <div>{i}: {item}</div>}
+          test
         </for>
       )
       expect(getHTML(el)).toBe('test<!--for-->')
@@ -59,14 +61,15 @@ describe('for', () => {
       let rendered = false
       function Else () {
         rendered = true
-        onDestructor(() => rendered = false)
+        Watch.activeWatcher?.onDestroy(() => rendered = false)
         return 'test'
       }
 
       const state = new State(['foo'])
       const el = render(
-        <for of={() => state.value} else={<Else />}>
+        <for of={() => state.value}>
           {(item, i) => <div>{i}: {item}</div>}
+          <Else />
         </for>
       )
       expect(rendered).toBe(false)
@@ -80,6 +83,16 @@ describe('for', () => {
       expect(rendered).toBe(false)
       expect(getHTML(el)).toBe('<div>0<!---->: foo</div><!----><!--for-->')
 
+    })
+    test('multiply else', () => {
+      const el = render(
+        <for of={[]}>
+          {(item, i) => <div>{i}: {item}</div>}
+          Test
+          {[' #1']}
+        </for>
+      )
+      expect(getHTML(el)).toBe('Test #1')
     })
     test('size', () => {
       const el = render(
